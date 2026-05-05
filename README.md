@@ -132,7 +132,7 @@ because:
 
 The downside is that running tests requires creds — solved by skip-on-empty.
 
-## What's intentionally not in v0.1
+## What's intentionally not in v1.0
 
 - **Refunds** — `refund()` returns `PaymentRefund(false, …)`. Use the tpay
   merchant panel for now.

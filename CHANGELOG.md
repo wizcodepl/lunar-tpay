@@ -5,6 +5,15 @@ All notable changes to `wizcodepl/lunar-tpay` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-05-05
+
+First stable release. Same feature set as 0.1.0 (nothing was added or removed); this tag declares the public API stable. From now on:
+
+- Breaking changes to `TpayPaymentDriver`, `TpayWebhookController`, the four `Tpay*` events, `TpayTransaction` model, `TpayTransactionStatus` enum, the three `Actions/*` classes, the `VerifyTpayJws` middleware, the `ProcessTpayNotification` job, and the published config keys will require a major bump (2.0.0+).
+- Internal refactors that don't change those signatures, plus new optional features, will go into 1.x.
+
+The package is in production use as of this tag.
+
 ## [0.1.0] - 2026-05-05
 
 Initial public release.
