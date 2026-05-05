@@ -16,9 +16,7 @@ use RuntimeException;
  */
 class TpayClient
 {
-    private const PROD_BASE_URL = 'https://openapi.tpay.com';
-
-    private const SANDBOX_BASE_URL = 'https://openapi.sandbox.tpay.com';
+    private const DEFAULT_API_BASE_URL = 'https://openapi.tpay.com';
 
     private ?string $accessToken = null;
 
@@ -27,7 +25,7 @@ class TpayClient
     public function __construct(
         private readonly string $clientId,
         private readonly string $clientSecret,
-        private readonly bool $sandbox = true,
+        private readonly ?string $apiBaseUrl = null,
     ) {}
 
     /**
@@ -121,6 +119,8 @@ class TpayClient
 
     private function baseUrl(): string
     {
-        return $this->sandbox ? self::SANDBOX_BASE_URL : self::PROD_BASE_URL;
+        return $this->apiBaseUrl
+            ?? (string) config('lunar-tpay.api_base_url')
+            ?: self::DEFAULT_API_BASE_URL;
     }
 }

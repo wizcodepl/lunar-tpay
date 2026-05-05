@@ -142,7 +142,7 @@ class TpayWebhookControllerTest extends TestCase
         {
             public function __construct(private readonly bool $verified)
             {
-                parent::__construct(sandbox: true);
+                parent::__construct(certBaseUrl: 'https://secure.sandbox.tpay.com');
             }
 
             public function verify(string $jwsHeader, string $rawBody): bool

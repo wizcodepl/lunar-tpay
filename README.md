@@ -24,7 +24,12 @@ php artisan vendor:publish --tag=lunar-tpay-config
 ```env
 TPAY_CLIENT_ID=...
 TPAY_CLIENT_SECRET=...
-TPAY_SANDBOX=true
+
+# Base URLs — omit on production (defaults to https://openapi.tpay.com / https://secure.tpay.com).
+# For sandbox / staging:
+TPAY_API_BASE_URL=https://openapi.sandbox.tpay.com
+TPAY_CERT_BASE_URL=https://secure.sandbox.tpay.com
+
 TPAY_RETURN_URL_SUCCESS=https://your-shop.com/order/ok
 TPAY_RETURN_URL_ERROR=https://your-shop.com/order/error
 ```

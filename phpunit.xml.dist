@@ -19,7 +19,8 @@
         <env name="APP_ENV" value="testing"/>
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
-        <env name="TPAY_SANDBOX" value="true"/>
+        <env name="TPAY_API_BASE_URL" value="https://openapi.sandbox.tpay.com"/>
+        <env name="TPAY_CERT_BASE_URL" value="https://secure.sandbox.tpay.com"/>
         <!--
             Set these in your shell before running `composer test`:
                 export TPAY_CLIENT_ID="..."

@@ -5,6 +5,16 @@ All notable changes to `wizcodepl/lunar-tpay` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-05-06
+
+### Changed
+- **Replaced `TPAY_SANDBOX` boolean with explicit base URLs.** New env vars: `TPAY_API_BASE_URL` (defaults to `https://openapi.tpay.com`) and `TPAY_CERT_BASE_URL` (defaults to `https://secure.tpay.com`). For sandbox set `TPAY_API_BASE_URL=https://openapi.sandbox.tpay.com` and `TPAY_CERT_BASE_URL=https://secure.sandbox.tpay.com`. Single source of truth per environment, opens the door to non-PL regional Tpay instances without code changes.
+- `TpayClient` constructor: `sandbox: bool` parameter replaced with `?string $apiBaseUrl`. `null` falls back to config. **Breaking only for callers instantiating `TpayClient` directly with the `sandbox:` named arg** — users wiring through the service provider are unaffected.
+- `TpayJwsVerifier` constructor: `sandbox: bool` parameter replaced with `?string $certBaseUrl`. Same impact as above.
+
+### Migration
+- `.env`: replace `TPAY_SANDBOX=true` with `TPAY_API_BASE_URL=https://openapi.sandbox.tpay.com` + `TPAY_CERT_BASE_URL=https://secure.sandbox.tpay.com`. Production: omit both (defaults are correct).
+
 ## [1.0.1] - 2026-05-06
 
 ### Added

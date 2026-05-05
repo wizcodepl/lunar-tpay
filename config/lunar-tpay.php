@@ -17,14 +17,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Sandbox / Production
+    | Base URLs
     |--------------------------------------------------------------------------
     |
-    | Sandbox uses https://openapi.sandbox.tpay.com.
-    | Production uses https://openapi.tpay.com.
+    | Tpay splits its services across two hosts:
+    |   - `api_base_url` — OpenAPI (OAuth + transactions). Default prod
+    |     `https://openapi.tpay.com`. Sandbox: `https://openapi.sandbox.tpay.com`.
+    |   - `cert_base_url` — JWS x509 cert / root CA distribution. Default prod
+    |     `https://secure.tpay.com`. Sandbox: `https://secure.sandbox.tpay.com`.
+    |
+    | Both default to production. Override per-environment via env:
+    |
+    |   TPAY_API_BASE_URL=https://openapi.sandbox.tpay.com
+    |   TPAY_CERT_BASE_URL=https://secure.sandbox.tpay.com
     |
     */
-    'sandbox' => env('TPAY_SANDBOX', true),
+    'api_base_url' => env('TPAY_API_BASE_URL', 'https://openapi.tpay.com'),
+    'cert_base_url' => env('TPAY_CERT_BASE_URL', 'https://secure.tpay.com'),
 
     /*
     |--------------------------------------------------------------------------

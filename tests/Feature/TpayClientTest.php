@@ -32,7 +32,7 @@ class TpayClientTest extends TestCase
         $this->client = new TpayClient(
             clientId: (string) getenv('TPAY_CLIENT_ID'),
             clientSecret: (string) getenv('TPAY_CLIENT_SECRET'),
-            sandbox: true,
+            apiBaseUrl: 'https://openapi.sandbox.tpay.com',
         );
     }
 

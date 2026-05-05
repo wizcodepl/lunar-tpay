@@ -23,7 +23,7 @@ class TpayJwsVerifierTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->verifier = new TpayJwsVerifier(sandbox: true);
+        $this->verifier = new TpayJwsVerifier(certBaseUrl: 'https://secure.sandbox.tpay.com');
     }
 
     public function test_returns_false_for_empty_signature(): void

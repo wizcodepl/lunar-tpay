@@ -46,7 +46,8 @@ abstract class TestCase extends Orchestra
 
         $app['config']->set('lunar-tpay.client_id', env('TPAY_CLIENT_ID', ''));
         $app['config']->set('lunar-tpay.client_secret', env('TPAY_CLIENT_SECRET', ''));
-        $app['config']->set('lunar-tpay.sandbox', true);
+        $app['config']->set('lunar-tpay.api_base_url', 'https://openapi.sandbox.tpay.com');
+        $app['config']->set('lunar-tpay.cert_base_url', 'https://secure.sandbox.tpay.com');
         $app['config']->set('lunar-tpay.return_url_success', 'https://example.test/ok');
         $app['config']->set('lunar-tpay.return_url_error', 'https://example.test/err');
     }

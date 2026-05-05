@@ -17,14 +17,11 @@ class LunarTpayServiceProvider extends ServiceProvider
             return new TpayClient(
                 clientId: (string) config('lunar-tpay.client_id'),
                 clientSecret: (string) config('lunar-tpay.client_secret'),
-                sandbox: (bool) config('lunar-tpay.sandbox', true),
             );
         });
 
         $this->app->singleton(TpayJwsVerifier::class, function () {
-            return new TpayJwsVerifier(
-                sandbox: (bool) config('lunar-tpay.sandbox', true),
-            );
+            return new TpayJwsVerifier;
         });
     }
 

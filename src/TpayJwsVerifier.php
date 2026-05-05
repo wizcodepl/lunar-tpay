@@ -19,26 +19,23 @@ use RuntimeException;
  *   5. Recompute the signing input: `headerB64 . '.' . base64url(rawBody)`.
  *   6. Verify the signature using the cert's public key (RS256).
  *
- * Cert URLs:
- *   prod:    https://secure.tpay.com/x509/notifications-jws.pem
- *   sandbox: https://secure.sandbox.tpay.com/x509/notifications-jws.pem
+ * Cert paths under `cert_base_url`:
+ *   /x509/notifications-jws.pem  — signing cert
+ *   /x509/tpay-jws-root.pem      — root CA
  *
- * Root CA URLs:
- *   prod:    https://secure.tpay.com/x509/tpay-jws-root.pem
- *   sandbox: https://secure.sandbox.tpay.com/x509/tpay-jws-root.pem
+ * Default `cert_base_url` is `https://secure.tpay.com` (production). Override
+ * via `TPAY_CERT_BASE_URL=https://secure.sandbox.tpay.com` for sandbox.
  */
 class TpayJwsVerifier
 {
-    private const PROD_HOST = 'https://secure.tpay.com';
-
-    private const SANDBOX_HOST = 'https://secure.sandbox.tpay.com';
+    private const DEFAULT_CERT_BASE_URL = 'https://secure.tpay.com';
 
     private const SIGNING_CERT_PATH = '/x509/notifications-jws.pem';
 
     private const ROOT_CA_PATH = '/x509/tpay-jws-root.pem';
 
     public function __construct(
-        private readonly bool $sandbox = true,
+        private readonly ?string $certBaseUrl = null,
         private readonly int $certCacheSeconds = 86400,
     ) {}
 
@@ -114,7 +111,7 @@ class TpayJwsVerifier
 
         if (isset($header['x5u']) && is_string($header['x5u'])) {
             // Tpay uses its own host — refuse arbitrary URLs to avoid SSRF.
-            $expected = $this->host().self::SIGNING_CERT_PATH;
+            $expected = $this->resolveCertBaseUrl().self::SIGNING_CERT_PATH;
             if ($header['x5u'] !== $expected) {
                 return null;
             }
@@ -123,12 +120,12 @@ class TpayJwsVerifier
         }
 
         // No cert hint — fall back to the well-known signing cert URL.
-        return $this->fetchPem('signing', $this->host().self::SIGNING_CERT_PATH);
+        return $this->fetchPem('signing', $this->resolveCertBaseUrl().self::SIGNING_CERT_PATH);
     }
 
     private function certIsTrusted(string $signingCertPem): bool
     {
-        $rootPem = $this->fetchPem('root', $this->host().self::ROOT_CA_PATH);
+        $rootPem = $this->fetchPem('root', $this->resolveCertBaseUrl().self::ROOT_CA_PATH);
 
         // Write the root CA to a temp file so openssl_x509_checkpurpose can use it
         // as the trust anchor. Verify the signing cert chains up to it.
@@ -167,9 +164,11 @@ class TpayJwsVerifier
         );
     }
 
-    private function host(): string
+    private function resolveCertBaseUrl(): string
     {
-        return $this->sandbox ? self::SANDBOX_HOST : self::PROD_HOST;
+        return $this->certBaseUrl
+            ?? (string) config('lunar-tpay.cert_base_url')
+            ?: self::DEFAULT_CERT_BASE_URL;
     }
 
     private static function base64UrlDecode(string $input): string
