@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="art/logo.svg" alt="Lunar Tpay" width="200">
+</p>
+
 # lunar-tpay
 
 [![tests](https://github.com/wizcodepl/lunar-tpay/actions/workflows/tests.yml/badge.svg)](https://github.com/wizcodepl/lunar-tpay/actions/workflows/tests.yml)
