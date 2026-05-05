@@ -1,0 +1,97 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Cannot access property \$value on int\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: src/Actions/UpdateOrderFromTpayStatus.php
+
+		-
+			message: '#^Access to an undefined property WizcodePl\\LunarTpay\\Models\\TpayTransaction\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Jobs/ProcessTpayNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contact_email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$meta\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Lunar\\Models\\Contracts\\Order\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Lunar\\Models\\Contracts\\Order\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Lunar\\Models\\Contracts\\Order\:\:\$meta\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Access to an undefined property Lunar\\Models\\Contracts\\Order\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Call to an undefined method Lunar\\Models\\Contracts\\Order\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Cannot access property \$value on int\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Parameter \#1 \$order of event class WizcodePl\\LunarTpay\\Events\\TpayPaymentFailed constructor expects Lunar\\Models\\Order\|null in WizcodePl\\LunarTpay\\Events\\TpayPaymentFailed\:\:dispatch\(\), Lunar\\Models\\Contracts\\Order given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Property Lunar\\PaymentTypes\\AbstractPayment\:\:\$order \(Lunar\\Models\\Contracts\\Order\|null\) does not accept Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/TpayPaymentDriver.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: src/TpayPaymentDriver.php

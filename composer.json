@@ -1,0 +1,58 @@
+{
+    "name": "wizcodepl/lunar-tpay",
+    "description": "Tpay (OpenAPI) payment driver for Lunar PHP — authorize, redirect, webhook-driven capture.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "lunar",
+        "lunarphp",
+        "laravel",
+        "tpay",
+        "payments",
+        "ecommerce",
+        "polish"
+    ],
+    "homepage": "https://github.com/wizcodepl/lunar-tpay",
+    "require": {
+        "php": "^8.2",
+        "lunarphp/core": "^1.3",
+        "tpay-com/tpay-openapi-php": "^1.7"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0",
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WizcodePl\\LunarTpay\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WizcodePl\\LunarTpay\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "WizcodePl\\LunarTpay\\LunarTpayServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "format": "vendor/bin/pint",
+        "format:check": "vendor/bin/pint --test",
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=512M"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

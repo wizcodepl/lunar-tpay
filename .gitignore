@@ -1,0 +1,11 @@
+/vendor
+/.claude
+/composer.lock
+/.phpunit.cache
+/.phpunit.result.cache
+/.idea
+/.fleet
+/.nova
+/.vscode
+/.zed
+.DS_Store

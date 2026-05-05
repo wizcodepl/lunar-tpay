@@ -1,0 +1,52 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    name: PHP ${{ matrix.php }} · Lunar ${{ matrix.lunar }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+        lunar: ['^1.3']
+
+    # Tpay sandbox secrets are repo-level; tests skip cleanly when missing
+    # (e.g. on PRs from forks). Owner can run e2e on `main` pushes.
+    env:
+      TPAY_CLIENT_ID: ${{ secrets.TPAY_SANDBOX_CLIENT_ID }}
+      TPAY_CLIENT_SECRET: ${{ secrets.TPAY_SANDBOX_CLIENT_SECRET }}
+      TPAY_NOTIFICATION_SECRET: ${{ secrets.TPAY_SANDBOX_NOTIFICATION_SECRET }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: bcmath, exif, intl, pdo_sqlite, sqlite3
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-php${{ matrix.php }}-lunar${{ matrix.lunar }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-${{ runner.os }}-php${{ matrix.php }}-lunar${{ matrix.lunar }}-
+
+      - name: Install dependencies
+        run: |
+          composer require "lunarphp/core:${{ matrix.lunar }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
+
+      - name: Run tests
+        run: vendor/bin/phpunit
