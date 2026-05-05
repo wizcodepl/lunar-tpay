@@ -6,6 +6,7 @@ namespace WizcodePl\LunarTpay\Actions;
 
 use Illuminate\Support\Facades\Log;
 use Lunar\Models\Order;
+use WizcodePl\LunarTpay\Enums\LunarOrderStatus;
 use WizcodePl\LunarTpay\Enums\TpayTransactionStatus;
 
 /**
@@ -31,6 +32,7 @@ class UpdateOrderFromTpayStatus
     public function __invoke(Order $order, array $payload): TpayTransactionStatus
     {
         $resolved = $this->resolveStatus($payload['status']);
+        $currentLunarStatus = LunarOrderStatus::tryFrom((string) $order->status);
 
         if ($resolved === TpayTransactionStatus::Paid && ! $this->amountMatches($order, $payload['amount'])) {
             Log::channel((string) config('lunar-tpay.log_channel', 'stack'))->warning(
@@ -50,12 +52,12 @@ class UpdateOrderFromTpayStatus
         // is a legitimate next state. Replays of older `cancelled` / `failed`
         // notifications (legitimately late, or maliciously replayed) must
         // not flip the order back. `refunded` orders are terminal too.
-        if ($this->isDowngrade($order->status, $resolved)) {
+        if ($currentLunarStatus !== null && $this->isDowngrade($currentLunarStatus, $resolved)) {
             Log::channel((string) config('lunar-tpay.log_channel', 'stack'))->warning(
                 'lunar-tpay | rejected notification that would downgrade an already-settled order',
                 [
                     'order_id' => $order->id,
-                    'current_order_status' => $order->status,
+                    'current_order_status' => $currentLunarStatus->value,
                     'reported_status' => $payload['status'],
                     'transactionId' => $payload['transactionId'],
                 ],
@@ -72,11 +74,11 @@ class UpdateOrderFromTpayStatus
 
             // Reflect current order state back to caller — the job's
             // idempotency check then sees "no transition" and skips events.
-            return $this->mirrorOrderStatus($order->status);
+            return $this->mirrorOrderStatus($currentLunarStatus);
         }
 
         $order->update([
-            'status' => $this->mapToOrderStatus($resolved),
+            'status' => $this->mapToOrderStatus($resolved)->value,
             'meta' => array_merge((array) $order->meta, [
                 'tpay' => array_merge((array) ($order->meta['tpay'] ?? []), [
                     'last_status' => $payload['status'],
@@ -100,13 +102,13 @@ class UpdateOrderFromTpayStatus
         };
     }
 
-    private function mapToOrderStatus(TpayTransactionStatus $status): string
+    private function mapToOrderStatus(TpayTransactionStatus $status): LunarOrderStatus
     {
         return match ($status) {
-            TpayTransactionStatus::Paid => 'paid',
-            TpayTransactionStatus::Refunded => 'refunded',
-            TpayTransactionStatus::Cancelled, TpayTransactionStatus::Failed => 'cancelled',
-            default => 'awaiting-payment',
+            TpayTransactionStatus::Paid => LunarOrderStatus::Paid,
+            TpayTransactionStatus::Refunded => LunarOrderStatus::Refunded,
+            TpayTransactionStatus::Cancelled, TpayTransactionStatus::Failed => LunarOrderStatus::Cancelled,
+            default => LunarOrderStatus::AwaitingPayment,
         };
     }
 
@@ -117,25 +119,25 @@ class UpdateOrderFromTpayStatus
      *   paid     → paid     (duplicate notification — let through, idempotent)
      *   refunded → refunded (duplicate notification — let through)
      */
-    private function isDowngrade(string $currentOrderStatus, TpayTransactionStatus $incoming): bool
+    private function isDowngrade(LunarOrderStatus $current, TpayTransactionStatus $incoming): bool
     {
-        if ($currentOrderStatus === 'paid') {
+        if ($current === LunarOrderStatus::Paid) {
             return $incoming !== TpayTransactionStatus::Paid
                 && $incoming !== TpayTransactionStatus::Refunded;
         }
 
-        if ($currentOrderStatus === 'refunded') {
+        if ($current === LunarOrderStatus::Refunded) {
             return $incoming !== TpayTransactionStatus::Refunded;
         }
 
         return false;
     }
 
-    private function mirrorOrderStatus(string $currentOrderStatus): TpayTransactionStatus
+    private function mirrorOrderStatus(LunarOrderStatus $current): TpayTransactionStatus
     {
-        return match ($currentOrderStatus) {
-            'paid' => TpayTransactionStatus::Paid,
-            'refunded' => TpayTransactionStatus::Refunded,
+        return match ($current) {
+            LunarOrderStatus::Paid => TpayTransactionStatus::Paid,
+            LunarOrderStatus::Refunded => TpayTransactionStatus::Refunded,
             default => TpayTransactionStatus::RedirectPending,
         };
     }
