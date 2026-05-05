@@ -120,6 +120,65 @@ class ProcessTpayNotificationTest extends TestCase
         Event::assertDispatched(TpayPaymentRefunded::class);
     }
 
+    public function test_paid_order_rejects_cancelled_replay(): void
+    {
+        // Regression: an attacker (or buggy upstream) replays an old `FALSE`
+        // notification *after* the order has been settled as `paid`. We must
+        // not flip the order back, and no Cancelled event must fire.
+        Event::fake([TpayPaymentReceived::class, TpayPaymentCancelled::class]);
+
+        $order = $this->orderWithExistingTransaction(amount: 1500, tpayId: 'TR-REPLAY');
+
+        // First a legitimate paid notification — order becomes `paid`.
+        $this->runJob($order, [
+            'transactionId' => 'TR-REPLAY',
+            'status' => 'paid',
+            'amount' => '15.00',
+            'order_id' => (string) $order->id,
+        ]);
+        $this->assertSame('paid', $order->fresh()->status);
+
+        // Then the replayed `FALSE` (cancelled) — must be rejected.
+        $this->runJob($order->fresh(), [
+            'transactionId' => 'TR-REPLAY',
+            'status' => 'FALSE',
+            'amount' => '15.00',
+            'order_id' => (string) $order->id,
+        ]);
+
+        $fresh = $order->fresh();
+        $this->assertSame('paid', $fresh->status, 'order must stay paid after replayed cancellation');
+        $this->assertSame('FALSE', $fresh->meta['tpay']['rejected_status'] ?? null);
+        Event::assertNotDispatched(TpayPaymentCancelled::class);
+    }
+
+    public function test_paid_order_still_allows_refund(): void
+    {
+        // The legitimate paid → refunded transition (real chargeback) must
+        // pass through even after the downgrade guard is in place.
+        Event::fake([TpayPaymentRefunded::class]);
+
+        $order = $this->orderWithExistingTransaction(amount: 1500, tpayId: 'TR-REFUND-AFTER-PAID');
+
+        $this->runJob($order, [
+            'transactionId' => 'TR-REFUND-AFTER-PAID',
+            'status' => 'paid',
+            'amount' => '15.00',
+            'order_id' => (string) $order->id,
+        ]);
+        $this->assertSame('paid', $order->fresh()->status);
+
+        $this->runJob($order->fresh(), [
+            'transactionId' => 'TR-REFUND-AFTER-PAID',
+            'status' => 'CHARGEBACK',
+            'amount' => '15.00',
+            'order_id' => (string) $order->id,
+        ]);
+
+        $this->assertSame('refunded', $order->fresh()->status);
+        Event::assertDispatched(TpayPaymentRefunded::class);
+    }
+
     /**
      * @param array{transactionId: string, status: string, amount: string, order_id: string} $payload
      */

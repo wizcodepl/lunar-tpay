@@ -5,6 +5,16 @@ All notable changes to `wizcodepl/lunar-tpay` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-05
+
+### Added
+- **Status downgrade guard** in `UpdateOrderFromTpayStatus`. Once an order is `paid`, the only allowed next state is `refunded`. Replays of older `cancelled` / `false` notifications (legitimately late, or maliciously replayed) no longer flip the order back. Order's `meta.tpay.rejected_status` records the rejected payload for forensics.
+- **Per-order locking** in `ProcessTpayNotification` via `Cache::lock` keyed by Lunar order id. Prevents two concurrent workers from double-dispatching domain events for notifications that arrive within milliseconds of each other.
+- **DB transaction** wrapping the order update + audit-row write inside the job — partial failures roll back cleanly and the queue retry runs again under idempotency.
+
+### Notes
+- No breaking API change — all additions are internal hardening. Existing listeners and callers keep working.
+
 ## [1.0.0] - 2026-05-05
 
 First stable release. Same feature set as 0.1.0 (nothing was added or removed); this tag declares the public API stable. From now on:
