@@ -8,21 +8,27 @@ on:
 
 jobs:
   unit:
-    name: PHP ${{ matrix.php }} · Lunar ${{ matrix.lunar }}
+    name: PHP ${{ matrix.php }} · Laravel ${{ matrix.laravel }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
-        lunar: ['^1.3']
+        php: ['8.3', '8.4', '8.5']
+        laravel: ['11.*', '12.*', '13.*']
+        include:
+          - laravel: '11.*'
+            testbench: '9.*'
+          - laravel: '12.*'
+            testbench: '10.*'
+          - laravel: '13.*'
+            testbench: '11.*'
 
     # Tpay sandbox secrets are repo-level; tests skip cleanly when missing
-    # (e.g. on PRs from forks). Owner can run e2e on `main` pushes.
+    # (e.g. on PRs from forks).
     env:
       TPAY_CLIENT_ID: ${{ secrets.TPAY_SANDBOX_CLIENT_ID }}
       TPAY_CLIENT_SECRET: ${{ secrets.TPAY_SANDBOX_CLIENT_SECRET }}
-      TPAY_NOTIFICATION_SECRET: ${{ secrets.TPAY_SANDBOX_NOTIFICATION_SECRET }}
 
     steps:
       - uses: actions/checkout@v4
@@ -35,18 +41,10 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ runner.os }}-php${{ matrix.php }}-lunar${{ matrix.lunar }}-${{ hashFiles('composer.json') }}
-          restore-keys: |
-            composer-${{ runner.os }}-php${{ matrix.php }}-lunar${{ matrix.lunar }}-
-
       - name: Install dependencies
         run: |
-          composer require "lunarphp/core:${{ matrix.lunar }}" --no-interaction --no-update
-          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-progress
 
       - name: Run tests
         run: vendor/bin/phpunit
